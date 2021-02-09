@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MyAuth</string>
+
+    <string name="some_id"> Укажите телефон</string>
+    <string name="phone_id">Код подверждения \nотправлен на номер</string>
+    <string name="to_come">Войти</string>
+    <string name="sms"> SMS код</string>
+    <string name="number">+7 (000) 000-00-00</string>
+    <string name="code"> Запросить код</string>
+</resources>
