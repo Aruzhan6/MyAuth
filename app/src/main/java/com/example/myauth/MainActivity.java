@@ -19,7 +19,16 @@ public class MainActivity extends AppCompatActivity {
 
     EditText edPhone, edSms;
     Button btnLogin;
-
+    /*if(TextUtils.isEmpty(edPhone.getText().toString())  ){
+            Toast.makeText(MainActivity.this,"Phone Required", Toast.LENGTH_LONG).show();
+        }else{
+            getSms(edPhone.getText().toString());
+            //proceed to login
+        }if (TextUtils.isEmpty(edPhone.getText().toString()) ||TextUtils.isEmpty(edSms.getText().toString()) ){
+            Toast.makeText(MainActivity.this,"Phone Required", Toast.LENGTH_LONG).show();
+        }else {
+            login(edPhone.getText().toString(),edSms.getText().toString());
+        }*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,57 +39,95 @@ public class MainActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
+                if (TextUtils.isEmpty(edPhone.getText().toString())) {
+                    Toast.makeText(MainActivity.this,"Phone Required", Toast.LENGTH_LONG).show();
+                } else if (TextUtils.isEmpty(edSms.getText().toString())) {
+                    getSms(edPhone.getText().toString());
 
-                if(TextUtils.isEmpty(edPhone.getText().toString()) || TextUtils.isEmpty(edSms.getText().toString())){
-                    Toast.makeText(MainActivity.this,"Username / Password Required", Toast.LENGTH_LONG).show();
-                }else{
-                    //proceed to login
-                    login();
                 }
-
+                 else {
+                    login(edPhone.getText().toString(), edSms.getText().toString());
+                }
             }
-        });
-    }
+
+            public void getSms(String phone){
+                LoginRequest loginRequest = new LoginRequest(phone);
 
 
-    public void login(){
-        LoginRequest loginRequest = new LoginRequest();
+                Call<LoginResponse> loginResponseCall = ApiClient.getUserService().userLogin(loginRequest);
+                loginResponseCall.enqueue(new Callback<LoginResponse>() {
 
-        Call<LoginResponse> loginResponseCall = ApiClient.getUserService().userLogin(loginRequest);
-        loginResponseCall.enqueue(new Callback<LoginResponse>() {
+                    @Override
+                    public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
 
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                        if(response.isSuccessful()){
+                            Toast.makeText(MainActivity.this,"SMS отправлен", Toast.LENGTH_LONG).show();
+                            LoginResponse loginResponse = response.body();
 
-                if(response.isSuccessful()){
-                    Toast.makeText(MainActivity.this,"Login Successful", Toast.LENGTH_LONG).show();
-                    LoginResponse loginResponse = response.body();
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
 
-                            startActivity(new Intent(MainActivity.this,DashboardActivity.class).putExtra("data",loginResponse.getPhone()));
+                        }else{
+                            Toast.makeText(MainActivity.this,"Не удалось отправить SMS", Toast.LENGTH_LONG).show();
+
                         }
-                    },700);
 
-                }else{
-                    Toast.makeText(MainActivity.this,"Login Failed", Toast.LENGTH_LONG).show();
+                    }
 
-                }
+
+                    @Override
+                    public void onFailure(Call<LoginResponse> call, Throwable t) {
+                        Toast.makeText(MainActivity.this,"Throwable "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+
+                    }
+
+
+                });
 
             }
 
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this,"Throwable "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            private void login(String phone,String otp){
+                LoginRequest loginRequest = new LoginRequest(phone, otp);
+
+
+                Call<LoginResponse> loginResponseCall = ApiClient.getUserService().userLogin(loginRequest);
+                loginResponseCall.enqueue(new Callback<LoginResponse>() {
+
+                    @Override
+                    public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+
+                        if(response.isSuccessful()){
+                            Toast.makeText(MainActivity.this,"Успешно", Toast.LENGTH_LONG).show();
+                            LoginResponse loginResponse = response.body();
+
+                        }else{
+                            Toast.makeText(MainActivity.this,"Ошибка", Toast.LENGTH_LONG).show();
+
+                        }
+
+                    }
+
+
+                    @Override
+                    public void onFailure(Call<LoginResponse> call, Throwable t) {
+                        Toast.makeText(MainActivity.this,"Throwable "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+
+                    }
+
+
+                });
 
             }
         });
-
-
     }
+
+
+
+
+
+
+
 
 }
